@@ -1,4 +1,4 @@
-import r from '../../../database/rethinkdriver';
+import knex from '../../../database/knexDriver';
 import {GraphQLNonNull, GraphQLID} from 'graphql';
 import {User, UserWithAuthToken} from './userSchema';
 import {errorObj} from '../utils';
@@ -18,7 +18,7 @@ export default {
     },
     async resolve(source, args, {authToken}) {
       isAdminOrSelf(authToken, args);
-      const user = await r.table('users').get(args.id);
+      const user = await knex('users').select({id:args.id});
       if (!user) {
         throw errorObj({_error: 'User not found'});
       }
@@ -37,10 +37,9 @@ export default {
       if (!user) {
         throw errorObj({_error: 'User not found'});
       }
-      const {strategies} = user;
-      const hashedPassword = strategies && strategies.local && strategies.local.password;
+      const hashedPassword = user.password
       if (!hashedPassword) {
-        throw errorObj({_error: getAltLoginMessage(strategies)});
+        throw errorObj({_error: "no password"});
       }
       const isCorrectPass = await compare(password, hashedPassword);
       if (isCorrectPass) {
@@ -57,7 +56,7 @@ export default {
       if (!id) {
         throw errorObj({_error: 'Invalid authentication Token'});
       }
-      const user = await r.table('users').get(id);
+      const user = await knex('users').select('*').where({id});
       if (!user) {
         throw errorObj({_error: 'User not found'});
       }
@@ -65,4 +64,3 @@ export default {
     }
   }
 };
-

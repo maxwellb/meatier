@@ -15,6 +15,9 @@ async function reset() {
     table.string('picture')
     table.string('gender')
     table.string('locale')
+    table.string('password')
+    table.string('verifiedEmailToken')
+    table.string('resetToken')
     table.timestamps();
   });
   await createTable('lanes', function(table) {

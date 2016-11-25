@@ -2,7 +2,7 @@ import {Note, NewNote, UpdatedNote} from './noteSchema';
 import {errorObj} from '../utils';
 import {isLoggedIn} from '../authorization';
 import {GraphQLNonNull, GraphQLBoolean, GraphQLID} from 'graphql';
-import r from '../../../database/rethinkdriver';
+import knex from '../../../database/knexDriver';
 
 export default {
   addNote: {
@@ -13,11 +13,11 @@ export default {
     async resolve(source, {note}, {authToken}) {
       isLoggedIn(authToken);
       note.createdAt = new Date();
-      const newNote = await r.table('notes').insert(note, {returnChanges: true});
+      const newNote = await knex('notes').returning(note.keys()).insert(note);
       if (newNote.errors) {
         throw errorObj({_error: 'Could not add note'});
       }
-      return newNote.changes[0].new_val;
+      return newNote;
     }
   },
   updateNote: {
@@ -29,11 +29,20 @@ export default {
       isLoggedIn(authToken);
       note.updatedAt = new Date();
       const {id, ...updates} = note;
-      const updatedNote = await r.table('notes').get(id).update(updates, {returnChanges: true});
+      const updatedNote = knex('notes')
+        .returning(note.keys())
+        .where('id', '=', note.id)
+        .update(updates)
+        .then(function(res) {
+          console.log({inserted: true})
+        }).catch(function(err) {
+          console.log(err)
+          throw errorObj({_error: 'Could not update note'});
+        })
       if (updatedNote.errors) {
         throw errorObj({_error: 'Could not update note'});
       }
-      return updatedNote.changes[0].new_val;
+      return updatedNote;
     }
   },
   deleteNote: {
@@ -43,9 +52,9 @@ export default {
     },
     async resolve(source, {id}, {authToken}) {
       isLoggedIn(authToken);
-      const result = await r.table('notes').get(id).delete();
+      const result = await knex('notes').where({id}).del()
       // return true is delete succeeded, false if doc wasn't found
-      return Boolean(result.deleted);
+      return result > 0;
     }
   }
 };

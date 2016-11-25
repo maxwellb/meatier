@@ -1,4 +1,5 @@
-import r from '../../../database/rethinkdriver';
+import pgLiveQuery from '../../../database/observer/pgLiveQuery';
+import knex from '../../../database/knexDriver';
 import {isLoggedIn} from '../authorization';
 import {getFields} from '../utils';
 import {Lane} from './laneSchema';
@@ -10,32 +11,25 @@ export default {
       const {fieldName} = refs;
       const requestedFields = Object.keys(getFields(refs));
       isLoggedIn(authToken);
-      r.table('lanes')
-        .filter(r.row('isPrivate').eq(false).or(r.row('userId').eq(authToken.id)))
-        .pluck(requestedFields)
-        .changes({includeInitial: true})
-        .run({cursor: true}, (err, cursor) => {
-          if (err) {
-            throw err;
-          }
-          cursor.each((err, data) => {
-            if (err) {
-              throw err;
-            }
-            const docId = data.new_val ? data.new_val.id : data.old_val.id;
-            if (socket.docQueue.has(docId)) {
-              socket.docQueue.delete(docId);
-            } else {
+      console.log(requestedFields)
+      pgLiveQuery(
+        knex('lanes').select('*')
+        .where('isPrivate', '=', false)
+        .orWhere('userId', '=', authToken.id)
+        .toString(),
+        (changes) => {
+          changes.forEach(({ id, rn, data }) => {
+            if(data) {
+              console.log(`upsert: ${id} at row ${rn}`, data);
               socket.emit(fieldName, data);
             }
-          });
-          socket.on('unsubscribe', channelName => {
-            if (channelName === fieldName) {
-              cursor.close();
+            else {
+              console.log(`delete: ${id}`);
+              socket.docQueue.delete(id);
             }
-          });
-        });
+          })
+        }
+      )
     }
   }
 };
-
