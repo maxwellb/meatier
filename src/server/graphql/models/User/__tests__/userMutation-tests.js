@@ -5,7 +5,7 @@ import 'babel-polyfill';
 import bcrypt from 'bcrypt';
 import {graphql} from 'graphql';
 import Schema from '../../../rootSchema';
-import r from '../../../../database/rethinkdriver';
+import knex from '../../../../database/knexDriver';
 import {same} from '../../../../../../tests/utils';
 
 // TODO enable tests once graphQL 15 exits beta
@@ -56,9 +56,9 @@ test('createUser:hashedPassword', async t => {
   }`;
   const actual = await graphql(Schema, query, null, {});
   const {user: {id}} = actual.data.newUser;
-  const user = await r.table('users').get(id);
+  const user = await knex('users').select('*').where({id});
   t.falsy(actual.errors, (actual.errors || []).map(error => error.stack));
-  t.true(await compare('a123123', user.strategies.local.password));
+  t.true(await compare('a123123', user.password));
 });
 
 test('createUser:caseInsensitive', async t => {
@@ -73,7 +73,7 @@ test('createUser:caseInsensitive', async t => {
   }`;
   const actual = await graphql(Schema, query, null, {});
   const {user: {id, email}} = actual.data.newUser;
-  await r.table('users').get(id);
+  await knex('users').select('*').where({id});
   t.falsy(actual.errors, (actual.errors || []).map(error => error.stack));
   t.is(email, 'createuser:caseinsensitive@createuser:caseinsensitive');
 });
@@ -206,8 +206,8 @@ test('emailPasswordReset:success', async t => {
   t.plan(1);
   await graphql(Schema, createQuery);
   await graphql(Schema, query, null, {});
-  const dbUser = await r.table('users').getAll('emailpasswordreset:success@emailpasswordreset:success', {index: 'email'});
-  const {resetToken} = dbUser[0].strategies.local;
+  const dbUser = await knew('users').select('*').where({email:'emailpasswordreset:success@emailpasswordreset:success'});
+  const {resetToken} = dbUser[0];
   t.truthy(resetToken);
 });
 
@@ -222,4 +222,3 @@ test('emailPasswordReset:userdoesntexist', async t => {
   const result = await graphql(Schema, query, null, {});
   t.is(result.errors[0].message, '{"_error":"User not found"}');
 });
-

@@ -1,9 +1,9 @@
-import r from '../../../database/rethinkdriver';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import knex from '../../../database/knexDriver';
 
 export const getUserByEmail = async email => {
-  const users = await r.table('users').getAll(email, {index: 'email'}).limit(1).run();
+  const users = await knex('users').select({email}).limit(1);
   return users[0];
 };
 

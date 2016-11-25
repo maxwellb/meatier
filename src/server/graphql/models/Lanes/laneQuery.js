@@ -13,7 +13,7 @@ export default {
     async resolve(source, {id}, {authToken}) {
       isLoggedIn(authToken);
       const {id: verifiedId, isAdmin} = authToken;
-      const lane = await knex.select('*').from('users').where({id})
+      const lane = await knex.select('*').from('lanes').where({userId: id})
       if (!lane) {
         throw errorObj({_error: 'Lane not found'});
       }

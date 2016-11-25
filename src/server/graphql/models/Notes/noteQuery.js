@@ -1,4 +1,4 @@
-import r from '../../../database/rethinkdriver';
+import knex from '../../../database/knexDriver';
 import {GraphQLNonNull, GraphQLID} from 'graphql';
 import {Note} from './noteSchema';
 import {errorObj} from '../utils';
@@ -12,7 +12,7 @@ export default {
     },
     async resolve(source, {id}, {authToken}) {
       isLoggedIn(authToken);
-      const note = await r.table('notes').get(id);
+      const note = await knex.select('*').from('notes').where({id})
       if (!note) {
         throw errorObj({_error: 'Note not found'});
       }
@@ -20,4 +20,3 @@ export default {
     }
   }
 };
-
