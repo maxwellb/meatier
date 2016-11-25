@@ -7,7 +7,7 @@ export default async function setupDB(isUpdate = false) {
 
 async function reset() {
   await createTable('users', function(table) {
-    table.increments('id').primary();
+    table.uuid('id').primary();
     table.string('email')
     table.boolean('isVerified')
     table.string('firstName')
@@ -21,16 +21,16 @@ async function reset() {
     table.timestamps();
   });
   await createTable('lanes', function(table) {
-    table.increments('id').primary()
-    table.integer('userId').references('id').inTable('users')
+    table.uuid('id').primary()
+    table.uuid('userId').references('id').inTable('users')
     table.boolean('isPrivate')
     table.string('title')
     table.timestamps()
   });
   await createTable('notes', function(table) {
-    table.increments('id').primary();
-    table.integer('userId').references('id').inTable('users')
-    table.integer('laneId').references('id').inTable('lanes')
+    table.uuid('id').primary();
+    table.uuid('userId').references('id').inTable('users')
+    table.uuid('laneId').references('id').inTable('lanes')
     table.string('title');
     table.string('index');
     table.timestamps();
