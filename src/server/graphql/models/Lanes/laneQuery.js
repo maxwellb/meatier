@@ -1,4 +1,4 @@
-import r from '../../../database/rethinkdriver';
+import knex from '../../../database/knexDriver';
 import {GraphQLNonNull, GraphQLID} from 'graphql';
 import {Lane} from './laneSchema';
 import {errorObj} from '../utils';
@@ -13,7 +13,7 @@ export default {
     async resolve(source, {id}, {authToken}) {
       isLoggedIn(authToken);
       const {id: verifiedId, isAdmin} = authToken;
-      const lane = await r.table('lanes').get(id);
+      const lane = await knex.select('*').from('users').where({id})
       if (!lane) {
         throw errorObj({_error: 'Lane not found'});
       }
@@ -24,4 +24,3 @@ export default {
     }
   }
 };
-
