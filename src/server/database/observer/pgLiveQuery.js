@@ -1,7 +1,7 @@
 import {Pool} from 'pg'
 import LiveQuery from 'pg-live-query'
 
-export default async function pgLiveQuery({query, changeCallback}) {
+export default async function pgLiveQuery(query, changeCallback) {
   const pool = new Pool({
     user: 'theophile',
     host: 'localhost',
@@ -39,8 +39,9 @@ export default async function pgLiveQuery({query, changeCallback}) {
     //     })
     // }
     // To get 'insert', 'update', 'delete', and 'changes' events
+    console.log(query)
     const handle = lq.watch(query);
-
+    console.log(typeof changeCallback)
     // The "changes" event contains several changes batched together
     handle.on('changes', changeCallback);
   })

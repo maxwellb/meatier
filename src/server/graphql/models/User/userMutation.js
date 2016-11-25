@@ -9,6 +9,7 @@ import promisify from 'es6-promisify';
 import bcrypt from 'bcrypt';
 import uuid from 'node-uuid';
 import knex from '../../../database/knexDriver';
+import moment from 'moment'
 const compare = promisify(bcrypt.compare);
 const hash = promisify(bcrypt.hash);
 
@@ -35,19 +36,20 @@ export default {
       } else {
         // production should use 12+, but it's slow for dev
         const newHashedPassword = await hash(password, 10);
-        const id = uuid.v4();
+        const id = uuid.v4(); //When I change all column without timezone then I execute insertArticle shows the error
         // must verify email within 1 day
         const verifiedEmailToken = makeSecretToken(id, 60 * 24);
         const userDoc = {
           id,
           email,
-          createdAt: new Date(),
+          // created_at: moment(new Date()).unix(),
           isVerified: false,
           password: newHashedPassword,
           verifiedEmailToken
         };
+        console.log(knex('users').insert(userDoc).toString())
         const newUser = await knex('users').insert(userDoc);
-        if (!newUser.inserted) {
+        if (!newUser) {
           throw errorObj({_error: 'Could not create account, please try again'});
         }
         // TODO send email with verifiedEmailToken via mailgun or whatever

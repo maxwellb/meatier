@@ -12,9 +12,10 @@ export default {
     },
     async resolve(source, {lane}, {authToken}) {
       isLoggedIn(authToken);
-      lane.createdAt = new Date().getTime()
+      console.log(lane)
+      // lane.createdAt = new Date().getTime()
       const newLane = knex('lanes')
-        .returning(lane.keys())
+        .returning(Object.keys(lane))
         .insert(lane)
         .then(function(res) {
           console.log({inserted: true})
