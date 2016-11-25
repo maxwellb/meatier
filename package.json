@@ -20,6 +20,7 @@
     "build:server": "NODE_ENV=production webpack --config ./webpack/server.babel.js",
     "build:db": "node ./src/server/database/setupDB.babel.js",
     "update:db": "node ./src/server/database/setupDB.babel.js true",
+    "test:observer": "node ./src/server/database/pgObserver.babel.js",
     "test": "NODE_ENV=testing ava ./src/**/__tests__/**/*.js --verbose",
     "lint": "xo --fix 'src/**/*.js' 'tests/*.js' 'webpack/*.js'",
     "profile": "NODE_ENV=production webpack --config ./webpack/prod.babel.js --profile --json > stats.json"
@@ -95,6 +96,9 @@
     "material-ui": "0.15.0",
     "node-env-flag": "0.1.0",
     "node-uuid": "1.4.7",
+    "pg": "^6.1.0",
+    "pg-live-query": "^1.0.1",
+    "pg-promise": "^5.4.3",
     "piping": "0.3.1",
     "react": "15.0.2",
     "react-dnd": "2.1.4",

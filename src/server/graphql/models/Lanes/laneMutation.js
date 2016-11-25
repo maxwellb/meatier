@@ -2,7 +2,7 @@ import {Lane, NewLane, UpdatedLane} from './laneSchema';
 import {errorObj} from '../utils';
 import {isLoggedIn} from '../authorization';
 import {GraphQLNonNull, GraphQLBoolean, GraphQLID} from 'graphql';
-import r from '../../../database/rethinkdriver';
+import knex from '../../../database/knexDriver';
 
 export default {
   addLane: {
@@ -12,12 +12,17 @@ export default {
     },
     async resolve(source, {lane}, {authToken}) {
       isLoggedIn(authToken);
-      lane.createdAt = new Date();
-      const newLane = await r.table('lanes').insert(lane, {returnChanges: true});
-      if (newLane.errors) {
-        throw errorObj({_error: 'Could not add lane'});
-      }
-      return newLane.changes[0].new_val;
+      lane.createdAt = new Date().getTime()
+      const newLane = knex('lanes')
+        .returning(lane.keys())
+        .insert(lane)
+        .then(function(res) {
+          console.log({inserted: true})
+        }).catch(function(err) {
+          console.log(err)
+          throw errorObj({_error: 'Could not add lane'})
+        })
+      return newLane;
     }
   },
   updateLane: {
@@ -27,13 +32,18 @@ export default {
     },
     async resolve(source, {lane}, {authToken}) {
       isLoggedIn(authToken);
-      lane.updatedAt = new Date();
-      const {id, ...updates} = lane;
-      const updatedLane = await r.table('lanes').get(id).update(updates, {returnChanges: true});
-      if (updatedLane.errors) {
-        throw errorObj({_error: 'Could not update lane'});
-      }
-      return updatedLane.changes[0].new_val;
+      lane.updatedAt = new Date().getTime()
+      const updatedLane = knex('lanes')
+        .returning(lane.keys())
+        .where('id', '=', lane.id)
+        .update(updates)
+        .then(function(res) {
+          console.log({inserted: true})
+        }).catch(function(err) {
+          console.log(err)
+          throw errorObj({_error: 'Could not update lane'});
+        })
+      return updatedLane;
     }
   },
   deleteLane: {
@@ -44,18 +54,18 @@ export default {
     async resolve(source, {id}, {authToken}) {
       isLoggedIn(authToken);
       const {id: verifiedId, isAdmin} = authToken;
-      if (!isAdmin) {
-        const laneToDelete = await r.table('lanes').get(id);
-        if (!laneToDelete) {
-          return false;
-        }
-        if (laneToDelete.userId !== verifiedId) {
-          throw errorObj({_error: 'Unauthorized'});
-        }
-      }
-      const result = await r.table('lanes').get(id).delete();
+      // if (!isAdmin) {
+      //   const laneToDelete = await knex.select('id').from('users').where({id})
+      //   if (!laneToDelete) {
+      //     return false;
+      //   }
+      //   if (laneToDelete.userId !== verifiedId) {
+      //     throw errorObj({_error: 'Unauthorized'});
+      //   }
+      // }
+      const result = await knex('users').where({id}).del()
       // return true is delete succeeded, false if doc wasn't found
-      return Boolean(result.deleted);
+      return result > 0;
     }
   }
 };

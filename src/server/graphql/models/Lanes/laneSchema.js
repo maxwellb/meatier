@@ -10,7 +10,7 @@ import {
 import {GraphQLTitleType} from '../types';
 import {makeRequired} from '../utils';
 import {Note} from '../Notes/noteSchema';
-import r from '../../../database/rethinkdriver';
+import knex from '../../../database/knexDriver';
 
 export const Lane = new GraphQLObjectType({
   name: 'Lane',
@@ -26,7 +26,7 @@ export const Lane = new GraphQLObjectType({
       type: new GraphQLList(Note),
       description: 'The notes in a given lane',
       resolve(source) {
-        return r.table('notes').getAll(source.id, {index: 'laneId'}).run();
+        return knex('notes').where({'laneId': source.id})
       }
     }
   })
