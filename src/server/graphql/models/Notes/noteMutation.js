@@ -12,12 +12,14 @@ export default {
     },
     async resolve(source, {note}, {authToken}) {
       isLoggedIn(authToken);
-      note.createdAt = new Date();
-      const newNote = await knex('notes').returning(note.keys()).insert(note);
-      if (newNote.errors) {
+      // note.createdAt = new Date();
+      const newNote = await knex('notes').returning(Object.keys(note)).insert(note);
+      console.log(newNote)
+      if (newNote.length && newNote.Length === 1) {
+        return newNote[0]
+      } else {
         throw errorObj({_error: 'Could not add note'});
       }
-      return newNote;
     }
   },
   updateNote: {
@@ -29,20 +31,16 @@ export default {
       isLoggedIn(authToken);
       note.updatedAt = new Date();
       const {id, ...updates} = note;
-      const updatedNote = knex('notes')
-        .returning(note.keys())
+      const updatedNote = await knex('notes')
+        .returning(Object.keys(note))
         .where('id', '=', note.id)
         .update(updates)
-        .then(function(res) {
-          console.log({inserted: true})
-        }).catch(function(err) {
-          console.log(err)
-          throw errorObj({_error: 'Could not update note'});
-        })
-      if (updatedNote.errors) {
-        throw errorObj({_error: 'Could not update note'});
+
+      if (updatedNote.length && updatedNote.Length === 1) {
+        return updatedNote[0]
+      } else {
+        throw errorObj({_error: 'Could not add note'});
       }
-      return updatedNote;
     }
   },
   deleteNote: {

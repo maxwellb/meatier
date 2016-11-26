@@ -17,7 +17,7 @@ export default {
         .where('isPrivate', '=', false)
         .orWhere('userId', '=', authToken.id)
         .toString(),
-        (changes) => {
+        ({changes, unsubscribeCallback}) => {
           changes.forEach(({ id, rn, data }) => {
             if(data) {
               console.log(`upsert: ${id} at row ${rn}`, data);
@@ -28,6 +28,11 @@ export default {
               socket.docQueue.delete(id);
             }
           })
+          socket.on('unsubscribe', channelName => {
+            if (channelName === fieldName) {
+              unsubscribeCallback();
+            }
+          });
         }
       )
     }

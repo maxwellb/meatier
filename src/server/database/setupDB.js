@@ -32,7 +32,7 @@ async function reset() {
     table.uuid('userId').references('id').inTable('users')
     table.uuid('laneId').references('id').inTable('lanes')
     table.string('title');
-    table.string('index');
+    table.integer('index');
     table.timestamps();
   });
 
