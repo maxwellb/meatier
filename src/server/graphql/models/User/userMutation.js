@@ -70,8 +70,8 @@ export default {
         throw errorObj({_error: 'User not found'});
       }
       const resetToken = makeSecretToken(user.id, 60 * 24);
-      const result = await knex('users').select({id: user.id}).update({resetToken});
-      if (!result.replaced) {
+      const result = await knex('users').returning('*').select({id: user.id}).update({resetToken});
+      if (!result) {
         throw errorObj({_error: 'Could not find or update user'});
       }
       console.log('Reset url:', `http://localhost:3000/login/reset-password/${resetToken}`);
@@ -101,7 +101,7 @@ export default {
         password: newHashedPassword,
         resetToken: null
       };
-      const newUser = await knex('users').select({id: user.id}).returnin('*').update(updates);
+      const newUser = await knex('users').select({id: user.id}).returning('*').update(updates);
       if (!newUser) {
         throw errorObj({_error: 'Could not find or update user'});
       }
@@ -155,8 +155,9 @@ export default {
       const result = await knex('users')
       .select({verifiedEmailToken: verifiedEmailTokenObj.id})
       .returning('*')
-      .update(updates, {returnChanges: true});
-      if (!result.replaced) {
+      .update(updates);
+      console.log('verify email', result)
+      if (!result) {
         throw errorObj({_error: 'Could not find or update user'});
       }
       return {

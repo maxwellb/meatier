@@ -14,16 +14,17 @@ export default {
       isLoggedIn(authToken);
       console.log(lane)
       // lane.createdAt = new Date().getTime()
-      const newLane = knex('lanes')
+      const newLane = await knex('lanes')
         .returning(Object.keys(lane))
         .insert(lane)
-        .then(function(res) {
-          console.log({inserted: true})
-        }).catch(function(err) {
-          console.log(err)
-          throw errorObj({_error: 'Could not add lane'})
-        })
-      return newLane;
+
+      if (newLane.length && newLane.length === 1) {
+        return newLane[0];
+      } else {
+        throw errorObj({_error: 'No lane was created'});
+      }
+      console.log("insertion", newLane)
+
     }
   },
   updateLane: {
@@ -33,18 +34,17 @@ export default {
     },
     async resolve(source, {lane}, {authToken}) {
       isLoggedIn(authToken);
-      lane.updatedAt = new Date().getTime()
-      const updatedLane = knex('lanes')
-        .returning(lane.keys())
+      // lane.updatedAt = new Date().getTime()
+      const updatedLane = await knex('lanes')
+        .returning(Object.keys(lane))
         .where('id', '=', lane.id)
-        .update(updates)
-        .then(function(res) {
-          console.log({inserted: true})
-        }).catch(function(err) {
-          console.log(err)
-          throw errorObj({_error: 'Could not update lane'});
-        })
-      return updatedLane;
+        .update(lane)
+
+      if (updatedLane.length && updatedLane.length === 1) {
+        return updatedLane[0];
+      } else {
+        throw errorObj({_error: 'No lane was updated'});
+      }
     }
   },
   deleteLane: {
@@ -64,7 +64,8 @@ export default {
       //     throw errorObj({_error: 'Unauthorized'});
       //   }
       // }
-      const result = await knex('users').where({id}).del()
+      const result = await knex('lanes').where({id}).del()
+      console.log("delete",result)
       // return true is delete succeeded, false if doc wasn't found
       return result > 0;
     }

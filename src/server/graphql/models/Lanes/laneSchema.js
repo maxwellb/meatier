@@ -26,7 +26,7 @@ export const Lane = new GraphQLObjectType({
       type: new GraphQLList(Note),
       description: 'The notes in a given lane',
       resolve(source) {
-        return knex('notes').where({'laneId': source.id})
+        return knex('notes').select('*').where({'laneId': source.id})
       }
     }
   })
