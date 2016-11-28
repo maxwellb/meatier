@@ -106,13 +106,14 @@ export function loadLanes() {
   return dispatch => {
     // client-side changefeed handler
     socket.on(sub, data => {
+      console.log(data)
       const meta = {synced: true};
-      if (!data.old_val) {
-        dispatch(addLane(data.new_val, meta));
-      } else if (!data.new_val) { // eslint-disable-line no-negated-condition
-        dispatch(deleteLane(data.old_val.id, meta));
+      if (data.insert) {
+        dispatch(addLane(data.inserted, meta));
+      } else if (data.update) { // eslint-disable-line no-negated-condition
+        dispatch(updateLane(data.updated, meta));
       } else {
-        dispatch(updateLane(data.new_val, meta));
+        dispatch(deleteLane(data.id, meta));
       }
     });
     socket.on('unsubscribe', channelName => {

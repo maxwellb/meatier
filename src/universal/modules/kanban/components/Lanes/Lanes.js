@@ -8,11 +8,13 @@ export default class Lanes extends Component {
     userId: PropTypes.string
   };
   render() {
+    console.log(this.props.lanes)
     const {data} = this.props.lanes;
     return <div className="lanes">{data.map(this.renderLane)}</div>;
   }
 
   renderLane = lane => {
+    console.log(lane)
     const {laneActions, userId} = this.props;
     return <LaneContainer key={`lane${lane.id}`} lane={lane} userId={userId} laneActions={laneActions}/>;
   };

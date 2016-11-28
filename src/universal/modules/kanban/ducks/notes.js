@@ -126,12 +126,12 @@ export function loadNotes() {
     // client-side changefeed handler
     socket.on(sub, data => {
       const meta = {synced: true};
-      if (!data.old_val) {
-        dispatch(addNote(data.new_val, meta));
-      } else if (!data.new_val) { // eslint-disable-line no-negated-condition
-        dispatch(deleteNote(data.old_val.id, meta));
+      if (data.insert) {
+        dispatch(addNote(data.inserted, meta));
+      } else if (data.update) { // eslint-disable-line no-negated-condition
+        dispatch(updateNote(data.updated, meta));
       } else {
-        dispatch(updateNote(data.new_val, meta));
+        dispatch(deleteNote(data.id, meta));
       }
     });
     socket.on('unsubscribe', channelName => {
