@@ -15,7 +15,7 @@ export default {
       // note.createdAt = new Date();
       const newNote = await knex('notes').returning(Object.keys(note)).insert(note);
       console.log(newNote)
-      if (newNote.length && newNote.Length === 1) {
+      if (newNote.length && newNote.length === 1) {
         return newNote[0]
       } else {
         throw errorObj({_error: 'Could not add note'});
@@ -29,14 +29,14 @@ export default {
     },
     async resolve(source, {note}, {authToken}) {
       isLoggedIn(authToken);
-      note.updatedAt = new Date();
+      // note.updatedAt = new Date();
       const {id, ...updates} = note;
       const updatedNote = await knex('notes')
         .returning(Object.keys(note))
         .where('id', '=', note.id)
         .update(updates)
 
-      if (updatedNote.length && updatedNote.Length === 1) {
+      if (updatedNote.length && updatedNote.length === 1) {
         return updatedNote[0]
       } else {
         throw errorObj({_error: 'Could not add note'});
