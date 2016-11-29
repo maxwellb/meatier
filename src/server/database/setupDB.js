@@ -22,7 +22,7 @@ async function reset() {
   });
   await createTable('lanes', function(table) {
     table.uuid('id').primary()
-    table.uuid('userId').references('id').inTable('users')
+    table.uuid('userId').references('id').inTable('users').onDelete('CASCADE')
     table.boolean('isPrivate')
     table.string('title')
     table.timestamps()
@@ -30,7 +30,7 @@ async function reset() {
   await createTable('notes', function(table) {
     table.uuid('id').primary();
     table.uuid('userId').references('id').inTable('users')
-    table.uuid('laneId').references('id').inTable('lanes')
+    table.uuid('laneId').references('id').inTable('lanes').onDelete('CASCADE')
     table.string('title');
     table.integer('index');
     table.timestamps();

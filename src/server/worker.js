@@ -5,7 +5,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import jwt from 'express-jwt';
 
-import config from '../../webpack/dev.babel.js';
+import config from '../../webpack/webpack.config.dev';
 import createSSR from './createSSR';
 import {googleAuthUrl, googleAuthCallback} from './graphql/models/User/oauthGoogle';
 import {wsGraphQLHandler, wsGraphQLSubHandler} from './graphql/wsGraphQLHandlers';
