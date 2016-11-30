@@ -106,8 +106,10 @@ export function loadLanes() {
   return dispatch => {
     // client-side changefeed handler
     socket.on(sub, data => {
-      console.log(data)
+      if (data.synced) return
       const meta = {synced: true};
+      console.log("onsub",data)
+      console.log("onsub",socket)
       if (data.insert) {
         dispatch(addLane(data.inserted, meta));
       } else if (data.update) { // eslint-disable-line no-negated-condition
