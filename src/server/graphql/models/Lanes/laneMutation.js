@@ -12,19 +12,18 @@ export default {
     },
     async resolve(source, {lane}, {authToken}) {
       isLoggedIn(authToken);
-      console.log(lane)
       // lane.createdAt = new Date().getTime()
       const newLane = await knex('lanes')
         .returning(Object.keys(lane))
         .insert(lane)
 
+      console.log("insertion", newLane)
       if (newLane.length && newLane.length === 1) {
         return newLane[0];
       } else {
+        // console.log({_error: 'No lane was created'})
         throw errorObj({_error: 'No lane was created'});
       }
-      console.log("insertion", newLane)
-
     }
   },
   updateLane: {

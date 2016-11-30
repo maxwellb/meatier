@@ -6,6 +6,9 @@ module.exports = {
     client: 'pg',
     connection: {
       database: 'meatier-pg',
+      host: 'localhost',
+      port: 5432,
+      user: 'theophile'
     },
     pool: {
       min: 2,

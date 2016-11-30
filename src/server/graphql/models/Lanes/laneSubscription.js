@@ -22,14 +22,20 @@ export default {
         .orWhere('userId', '=', authToken.id)
         .toString(),
         onInsert: ({id, inserted}) => {
-          socket.emit(fieldName, {insert: true, inserted});
+          if (!socket.docQueue.has(id)) {
+            console.log("insert", authToken)
+            socket.emit(fieldName, {insert: true, inserted});
+          }
         },
         onUpdate: ({id, updated}) => {
           socket.emit(fieldName, {update: true, updated});
         },
         onDelete: ({id}) => {
-          socket.docQueue.delete(id);
-        }
+          if (socket.docQueue.has(id)) {
+            socket.docQueue.delete(id)
+          }
+        },
+        userId: authToken.id
       })
     }
   }

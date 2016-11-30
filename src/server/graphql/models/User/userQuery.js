@@ -19,7 +19,7 @@ export default {
     async resolve(source, args, {authToken}) {
       isAdminOrSelf(authToken, args);
       const user = await knex('users').select('*').where({id:args.id});
-      if (!user) {
+      if (!user || !user.id) {
         throw errorObj({_error: 'User not found'});
       }
       return user;

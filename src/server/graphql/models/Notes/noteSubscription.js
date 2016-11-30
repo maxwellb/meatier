@@ -25,8 +25,11 @@ export default {
           socket.emit(fieldName, {update: true, updated});
         },
         onDelete: ({id}) => {
-          socket.docQueue.delete(id);
-        }
+          if (socket.docQueue.has(id)) {
+            socket.docQueue.delete(id)
+          }
+        },
+        userId: authToken.id
       })
     }
   }
