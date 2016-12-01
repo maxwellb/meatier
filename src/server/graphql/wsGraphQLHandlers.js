@@ -10,6 +10,7 @@ export const wsGraphQLHandler = async function (body, cb) {
     console.warn('No documentId found for the doc submitted via websockets!');
     return cb({_error: 'No documentId found'});
   }
+  console.log("docid ", docId)
   this.docQueue.add(docId);
   const result = await graphql(Schema, query, null, {authToken, socket: this, ...context}, variables);
   const {error, data} = prepareClientError(result);
