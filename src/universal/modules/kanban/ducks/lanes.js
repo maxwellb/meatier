@@ -4,6 +4,7 @@ import {ensureState} from 'redux-optimistic-ui';
 import socketOptions from '../../../utils/socketOptions';
 import {prepareGraphQLParams} from '../../../utils/fetching';
 import {deleteNote} from './notes';
+import _ from 'lodash'
 
 /*
  * Action types
@@ -103,17 +104,16 @@ export function loadLanes() {
   const sub = 'getAllLanes';
   const socket = socketCluster.connect(socketOptions);
   socket.subscribe(serializedParams, {waitForAuth: true});
-  return dispatch => {
+  return (dispatch) => {
     // client-side changefeed handler
     socket.on(sub, data => {
       if (data.synced) return
       const meta = {synced: true};
-      console.log("onsub",data)
-      console.log("onsub",socket)
-      if (data.insert) {
-        dispatch(addLane(data.inserted, meta));
-      } else if (data.update) { // eslint-disable-line no-negated-condition
-        dispatch(updateLane(data.updated, meta));
+      const {insert, inserted, update, updated} = data
+      if (insert) {
+        dispatch(addLane(inserted, meta));
+      } else if (update) { // eslint-disable-line no-negated-condition
+        dispatch(updateLane(updated, meta));
       } else {
         dispatch(deleteLane(data.id, meta));
       }
@@ -127,6 +127,9 @@ export function loadLanes() {
 }
 
 export function addLane(doc, meta) {
+  const socket = socketCluster.connect(socketOptions);
+  socket.unsubscribe()
+
   const query = `
   mutation($doc: NewLane!){
      payload: addLane(lane: $doc) {
