@@ -19,10 +19,11 @@ export default {
     async resolve(source, args, {authToken}) {
       isAdminOrSelf(authToken, args);
       const user = await knex('users').select('*').where({id:args.id});
-      if (!user || !user.id) {
+      console.log(user)
+      if (!user || user.length !== 1) {
         throw errorObj({_error: 'User not found'});
       }
-      return user;
+      return user[0];
     }
   },
   login: {
@@ -34,7 +35,7 @@ export default {
     async resolve(source, args) {
       const {email, password} = args;
       const user = await getUserByEmail(email);
-      if (!user) {
+      if (!user || !user.id) {
         throw errorObj({_error: 'User not found'});
       }
       const hashedPassword = user.password
@@ -57,10 +58,11 @@ export default {
         throw errorObj({_error: 'Invalid authentication Token'});
       }
       const user = await knex('users').select('*').where({id});
-      if (!user) {
+
+      if (!user || user.length !== 1) {
         throw errorObj({_error: 'User not found'});
       }
-      return user;
+      return user[0];
     }
   }
 };

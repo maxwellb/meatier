@@ -16,20 +16,16 @@ export default {
           unwatch();
         }
       })
+      const {docQueue} = socket
       liveQuery({
         query: knex('notes').select(requestedFields).toString(),
-        onInsert: ({id, inserted}) => {
-          socket.emit(fieldName, {insert: true, inserted});
-        },
-        onUpdate: ({id, updated}) => {
-          socket.emit(fieldName, {update: true, updated});
-        },
-        onDelete: ({id}) => {
-          if (socket.docQueue.has(id)) {
-            socket.docQueue.delete(id)
+        onChange: ({type, data, id}) => {
+          if (data.id && docQueue.has(data.id)) {
+            docQueue.delete(id)
+          } else {
+            socket.emit(fieldName, {type, data, id});
           }
-        },
-        userId: authToken.id
+        }
       })
     }
   }
