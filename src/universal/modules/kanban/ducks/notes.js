@@ -124,14 +124,21 @@ export function loadNotes() {
   socket.subscribe(serializedParams, {waitForAuth: true});
   return dispatch => {
     // client-side changefeed handler
-    socket.on(sub, data => {
+    socket.on(sub, payload => {
       const meta = {synced: true};
-      if (data.insert) {
-        dispatch(addNote(data.inserted, meta));
-      } else if (data.update) { // eslint-disable-line no-negated-condition
-        dispatch(updateNote(data.updated, meta));
-      } else {
-        dispatch(deleteNote(data.id, meta));
+      const {type, data, id} = payload
+      switch (type) {
+        case 'insert':
+          dispatch(addNote(data, meta));
+        break
+        case 'update':
+          dispatch(updateNote(data, meta));
+        break
+        case 'delete':
+          dispatch(deleteNote(id, meta));
+        break
+        default:
+          console.error('unexpected note socket', {type, data, id})
       }
     });
     socket.on('unsubscribe', channelName => {

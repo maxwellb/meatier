@@ -4,6 +4,7 @@ import knex from '../../../database/knexDriver';
 
 export const getUserByEmail = async email => {
   const users = await knex('users').select('*').where({email}).limit(1);
+  console.log(users)
   return users[0];
 };
 

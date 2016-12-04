@@ -106,16 +106,21 @@ export function loadLanes() {
   socket.subscribe(serializedParams, {waitForAuth: true});
   return (dispatch) => {
     // client-side changefeed handler
-    socket.on(sub, data => {
-      if (data.synced) return
+    socket.on(sub, payload => {
       const meta = {synced: true};
-      const {insert, inserted, update, updated} = data
-      if (insert) {
-        dispatch(addLane(inserted, meta));
-      } else if (update) { // eslint-disable-line no-negated-condition
-        dispatch(updateLane(updated, meta));
-      } else {
-        dispatch(deleteLane(data.id, meta));
+      const {type, data, id} = payload
+      switch (type) {
+        case 'insert':
+          dispatch(addLane(data, meta));
+        break
+        case 'update':
+          dispatch(updateLane(data, meta));
+        break
+        case 'delete':
+          dispatch(deleteLane(id, meta));
+        break
+        default:
+        console.error('unexpected lane socket', {type, data, id})
       }
     });
     socket.on('unsubscribe', channelName => {

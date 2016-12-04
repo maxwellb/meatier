@@ -11,23 +11,37 @@ const pool = new Pool({
 });
 let client
 let lq
-export async function liveQuery({query, onInsert, onUpdate, onDelete}) {
-  client = client ? client : await pool.connect()
-  lq = lq ? lq : new LiveQuery(client)
-  console.log("Live query watching", query)
-  const handle = lq.watch(query)
-  handle.on('insert', (id, row, cols) => {
-    const inserted = getObject(id, row, cols)
-    onInsert({id, inserted})
-  })
-  handle.on('update', (id, row, cols) => {
-    const updated = getObject(id, row, cols)
-    onUpdate({id, updated})
-  })
-  // The "delete" event only contains the id
-  handle.on('delete', (id) => {
-    onDelete({id})
-  })
+export async function liveQuery({query, onChange}) {
+  try {
+    client = client ? client : await pool.connect()
+    lq = lq ? lq : new LiveQuery(client)
+    console.log("Live query watching", query)
+    const handle = lq.watch(query)
+    const set = {}
+    handle.on('insert', (id, row, cols) => {
+      const response = formalize('insert', {id, row, cols})
+      set[id] = response.data
+      onChange(response)
+    })
+    handle.on('update', (id, row, cols) => {
+      const response = formalize('update', {id, row, cols})
+      set[id] = response.data
+      onChange(response)
+    })
+    // The "delete" event only contains the id
+    handle.on('delete', (id) => {
+      const response = formalize('delete', {id})
+      response.data = set[id]
+      delete set[id]
+      onChange(response)
+    })
+    handle.on('error', (err) => {
+      console.error({err})
+    })
+  } catch(e) {
+    console.log("Big error",e)
+  }
+
 }
 
 export function unwatch() {
@@ -35,10 +49,12 @@ export function unwatch() {
   client.release()
 }
 
-function getObject(id, row, cols) {
-  const out = {};
-  cols.forEach((col, i) => {
-      out[col] = row[i] || null;
-  });
-  return out
+function formalize(type, {id, row, cols}) {
+  let data = {}
+  if (row && cols) {
+    cols.forEach((col, i) => {
+        data[col] = row[i] || null;
+    })
+  }
+  return {type, data, id}
 }

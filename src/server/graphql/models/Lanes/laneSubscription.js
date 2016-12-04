@@ -16,31 +16,17 @@ export default {
           unwatch();
         }
       });
+      const {docQueue} = socket
       liveQuery({
         query: knex('lanes').column(requestedFields).select()
         .where('isPrivate', '=', false)
         .orWhere('userId', '=', authToken.id)
         .toString(),
-        onInsert: ({id, inserted}) => {
-          console.log(socket.docQueue)
-          if (socket.docQueue.has(inserted.id)) {
-            socket.docQueue.delete(id)
+        onChange: ({type, data, id}) => {
+          if (data.id && docQueue.has(data.id)) {
+            docQueue.delete(id)
           } else {
-            socket.emit(fieldName, {insert: true, inserted});
-          }
-        },
-        onUpdate: ({id, updated}) => {
-          if (socket.docQueue.has(updated.id)) {
-            socket.docQueue.delete(id)
-          } else {
-            socket.emit(fieldName, {update: true, updated});
-          }
-        },
-        onDelete: ({id}) => {
-          if (socket.docQueue.has(id)) {
-            socket.docQueue.delete(id)
-          } else {
-            socket.emit(fieldName, {id});
+            socket.emit(fieldName, {type, data, id});
           }
         }
       })

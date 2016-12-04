@@ -97,7 +97,7 @@
     "node-env-flag": "0.1.0",
     "node-uuid": "1.4.7",
     "pg": "^6.1.0",
-    "pg-live-query": "^1.0.1",
+    "pg-live-query": "github:theobat/pg-live-query",
     "pg-promise": "^5.4.3",
     "piping": "0.3.1",
     "react": "15.0.2",

@@ -1,3 +1,3 @@
 require('babel-register')
 require('babel-polyfill')
-require('./observer/pgLiveQuery')()
+require('./observer/liveTest.js')()
