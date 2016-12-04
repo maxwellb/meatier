@@ -135,7 +135,7 @@ export function loadNotes() {
           dispatch(updateNote(data, meta));
         break
         case 'delete':
-          dispatch(deleteNote(id, meta));
+          dispatch(deleteNote(data.id, meta));
         break
         default:
           console.error('unexpected note socket', {type, data, id})

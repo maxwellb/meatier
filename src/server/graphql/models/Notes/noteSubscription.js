@@ -21,7 +21,7 @@ export default {
         query: knex('notes').select(requestedFields).toString(),
         onChange: ({type, data, id}) => {
           if (data.id && docQueue.has(data.id)) {
-            docQueue.delete(id)
+            docQueue.delete(data.id)
           } else {
             socket.emit(fieldName, {type, data, id});
           }
