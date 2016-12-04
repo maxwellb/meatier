@@ -117,7 +117,7 @@ export function loadLanes() {
           dispatch(updateLane(data, meta));
         break
         case 'delete':
-          dispatch(deleteLane(id, meta));
+          dispatch(deleteLane(data.id, meta));
         break
         default:
         console.error('unexpected lane socket', {type, data, id})
