@@ -1,4 +1,4 @@
-import knex from '../../../database/knexDriver';
+import knex from 'server/database/knexDriver';
 import {GraphQLNonNull, GraphQLID} from 'graphql';
 import {User, UserWithAuthToken} from './userSchema';
 import {errorObj} from '../utils';
