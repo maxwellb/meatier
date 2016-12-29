@@ -9,9 +9,10 @@ export const getUserByEmail = async email => {
 };
 
 export const signJwt = ({id}) => {
+  const role = 'test'
   const secret = process.env.JWT_SECRET || 'topsecret';
   // sync https://github.com/auth0/node-jsonwebtoken/issues/111
-  return jwt.sign({id}, secret, {expiresIn: '7d'});
+  return jwt.sign({id, role}, secret, {expiresIn: '7d'});
 };
 
 /* if login fails with 1 strategy, suggest another*/
